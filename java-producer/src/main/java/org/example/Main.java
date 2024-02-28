@@ -1,20 +1,15 @@
 package org.example;
 
-import io.cloudevents.core.format.EventFormat;
-import io.cloudevents.core.provider.EventFormatProvider;
-import io.cloudevents.kafka.CloudEventSerializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.example.cloudevents.KafkaAvroFormat;
 import org.example.events.OrderEvent;
 import org.example.events.OrderEventData;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Main {
     static boolean isRunning = true;
@@ -28,14 +23,6 @@ public class Main {
         producerConf.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
         producerConf.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "true");
         producerConf.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
-
-        KafkaAvroFormat kafkaAvroFormat = new KafkaAvroFormat(producerConf.entrySet().stream().collect(
-                Collectors.toMap(
-                        e -> String.valueOf(e.getKey()),
-                        e -> e.getValue(),
-                        (prev, next) -> next, HashMap::new
-                )), false);
-        EventFormatProvider.getInstance().registerFormat(kafkaAvroFormat);
 
         KafkaProducer<String, OrderEvent> producer = new KafkaProducer<>(producerConf);
 
